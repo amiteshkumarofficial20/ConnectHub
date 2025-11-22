@@ -13,6 +13,7 @@ export const users = pgTable("users", {
   bio: text("bio"),
   profilePicture: text("profile_picture"),
   isOnline: boolean("is_online").default(false),
+  isVerified: boolean("is_verified").default(false),
   lastSeen: timestamp("last_seen"),
   createdAt: timestamp("created_at").defaultNow(),
 });
@@ -80,6 +81,14 @@ export const notifications = pgTable("notifications", {
   content: text("content").notNull(),
   relatedId: varchar("related_id"),
   isRead: boolean("is_read").default(false),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const messageReactions = pgTable("message_reactions", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  messageId: varchar("message_id").notNull().references(() => messages.id, { onDelete: "cascade" }),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  emoji: text("emoji").notNull(),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -165,6 +174,17 @@ export const groupMembersRelations = relations(groupMembers, ({ one }) => ({
 export const notificationsRelations = relations(notifications, ({ one }) => ({
   user: one(users, {
     fields: [notifications.userId],
+    references: [users.id],
+  }),
+}));
+
+export const messageReactionsRelations = relations(messageReactions, ({ one }) => ({
+  message: one(messages, {
+    fields: [messageReactions.messageId],
+    references: [messages.id],
+  }),
+  user: one(users, {
+    fields: [messageReactions.userId],
     references: [users.id],
   }),
 }));

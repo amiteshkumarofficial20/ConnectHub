@@ -1,8 +1,9 @@
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
+import { BadgeCheck } from 'lucide-react';
 import type { User } from '@shared/schema';
 
 interface UserAvatarProps {
-  user: Pick<User, 'name' | 'profilePicture'>;
+  user: Pick<User, 'name' | 'profilePicture' | 'isVerified'>;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
   showOnlineStatus?: boolean;
@@ -60,6 +61,9 @@ export function UserAvatar({
           }`}
           data-testid={`status-${isOnline ? 'online' : 'offline'}`}
         />
+      )}
+      {user.isVerified && (
+        <BadgeCheck className="absolute -bottom-1 -right-1 w-4 h-4 text-blue-500 bg-white dark:bg-slate-950 rounded-full" data-testid="badge-verified" />
       )}
     </div>
   );

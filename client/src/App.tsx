@@ -15,6 +15,7 @@ import Messages from "@/pages/messages";
 import Groups from "@/pages/groups";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
+import Notifications from "@/pages/notifications";
 import NotFound from "@/pages/not-found";
 import { Bell } from "lucide-react";
 import { Button } from "@/components/ui/button";
