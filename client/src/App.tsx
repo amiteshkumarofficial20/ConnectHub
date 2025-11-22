@@ -70,9 +70,6 @@ function AppLayout({ children }: { children: React.ReactNode }) {
           <header className="flex items-center justify-between p-4 border-b border-border">
             <SidebarTrigger data-testid="button-sidebar-toggle" />
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" data-testid="button-notifications">
-                <Bell className="w-5 h-5" />
-              </Button>
               <ThemeToggle />
             </div>
           </header>
@@ -97,6 +94,66 @@ function Router() {
             component={() => (
               <AppLayout>
                 <Feed />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
+      <Route path="/messages">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Messages />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
+      <Route path="/groups">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Groups />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
+      <Route path="/notifications">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Notifications />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
+      <Route path="/profile/:userId">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
+      <Route path="/settings">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Settings />
               </AppLayout>
             )}
           />

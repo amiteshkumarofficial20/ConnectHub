@@ -27,61 +27,63 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     const connect = () => {
       try {
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
-        const hostname = window.location.hostname || "localhost";
-        const port = window.location.port || (window.location.protocol === "https:" ? "443" : "80");
-        const wsUrl = `${protocol}//${hostname}${port && port !== "80" && port !== "443" ? `:${port}` : ""}/ws`;
+        const host = window.location.host; // This includes port if non-standard
+        const wsUrl = `${protocol}//${host}/ws`;
         const ws = new WebSocket(wsUrl);
 
-      ws.onopen = () => {
-        console.log('WebSocket connected');
-        isConnectedRef.current = true;
-        const token = localStorage.getItem('token');
-        ws.send(JSON.stringify({
-          type: 'authenticate',
-          userId: user.id,
-          token,
-        }));
-      };
+        ws.onopen = () => {
+          console.log('WebSocket connected');
+          isConnectedRef.current = true;
+          const token = localStorage.getItem('token');
+          ws.send(JSON.stringify({
+            type: 'authenticate',
+            userId: user.id,
+            token,
+          }));
+        };
 
-      ws.onmessage = (event) => {
-        try {
-          const data = JSON.parse(event.data);
-          
-          if (data.type === 'new_message') {
-            queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
-            queryClient.invalidateQueries({ queryKey: ['/api/messages/conversations'] });
-            queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
-            const message = data.message;
-            if (message.receiverId || message.senderId) {
-              const otherUserId = message.receiverId === user.id ? message.senderId : message.receiverId;
-              if (otherUserId) {
-                queryClient.invalidateQueries({ queryKey: ['/api/messages', otherUserId] });
+        ws.onmessage = (event) => {
+          try {
+            const data = JSON.parse(event.data);
+            
+            if (data.type === 'new_message') {
+              queryClient.invalidateQueries({ queryKey: ['/api/messages'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/messages/conversations'] });
+              queryClient.invalidateQueries({ queryKey: ['/api/groups'] });
+              const message = data.message;
+              if (message.receiverId || message.senderId) {
+                const otherUserId = message.receiverId === user.id ? message.senderId : message.receiverId;
+                if (otherUserId) {
+                  queryClient.invalidateQueries({ queryKey: ['/api/messages', otherUserId] });
+                }
               }
+            } else if (data.type === 'user_online' || data.type === 'user_offline') {
+              queryClient.invalidateQueries({ queryKey: ['/api/users/online'] });
             }
-          } else if (data.type === 'user_online' || data.type === 'user_offline') {
-            queryClient.invalidateQueries({ queryKey: ['/api/users/online'] });
+          } catch (error) {
+            console.error('WebSocket message error:', error);
           }
-        } catch (error) {
-          console.error('WebSocket message error:', error);
-        }
-      };
+        };
 
-      ws.onerror = (error) => {
-        console.error('WebSocket error:', error);
-      };
+        ws.onerror = (error) => {
+          console.error('WebSocket error:', error);
+        };
 
-      ws.onclose = () => {
-        console.log('WebSocket disconnected');
-        isConnectedRef.current = false;
-        wsRef.current = null;
-        
-        reconnectTimeoutRef.current = setTimeout(() => {
-          console.log('Attempting to reconnect...');
-          connect();
-        }, 3000);
-      };
+        ws.onclose = () => {
+          console.log('WebSocket disconnected');
+          isConnectedRef.current = false;
+          wsRef.current = null;
+          
+          reconnectTimeoutRef.current = setTimeout(() => {
+            console.log('Attempting to reconnect...');
+            connect();
+          }, 3000);
+        };
 
-      wsRef.current = ws;
+        wsRef.current = ws;
+      } catch (error) {
+        console.error('Failed to create WebSocket:', error);
+      }
     };
 
     connect();

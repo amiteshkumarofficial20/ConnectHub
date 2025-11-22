@@ -196,6 +196,64 @@
  * need to be distinguished from eachother visually.
  */
 @layer utilities {
+  /* Enhanced gradient backgrounds for cards */
+  .card-gradient {
+    background: linear-gradient(135deg, hsl(var(--card)) 0%, hsl(var(--card) / 0.8) 100%);
+  }
+
+  .primary-gradient {
+    background: linear-gradient(135deg, hsl(var(--primary)) 0%, hsl(var(--primary) / 0.8) 100%);
+  }
+
+  /* Professional shadows */
+  .shadow-sm-professional {
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+  }
+
+  .shadow-md-professional {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07), 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .shadow-lg-professional {
+    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.1), 0 4px 6px rgba(0, 0, 0, 0.05);
+  }
+
+  /* Smooth transitions */
+  .transition-smooth {
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  /* Professional hover effects */
+  .hover-scale {
+    @apply transition-smooth hover:scale-[1.02];
+  }
+
+  .hover-glow {
+    @apply transition-smooth hover:shadow-lg-professional;
+  }
+
+  /* Badge styling */
+  .badge-premium {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full bg-gradient-to-r from-yellow-400 to-orange-400 text-white text-xs font-semibold shadow-md-professional;
+  }
+
+  .badge-verified {
+    @apply inline-flex items-center gap-1 px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 text-xs font-semibold;
+  }
+
+  /* Message bubble styling */
+  .message-bubble-sent {
+    @apply bg-primary text-primary-foreground rounded-2xl rounded-tr-none px-4 py-2 max-w-xs shadow-sm-professional;
+  }
+
+  .message-bubble-received {
+    @apply bg-card text-card-foreground border border-card-border rounded-2xl rounded-tl-none px-4 py-2 max-w-xs shadow-sm-professional;
+  }
+
+  /* Input focus styles */
+  .input-professional:focus {
+    @apply ring-2 ring-primary/20 border-primary;
+  }
 
   /* Hide ugly search cancel button in Chrome until we can style it properly */
   input[type="search"]::-webkit-search-cancel-button {
