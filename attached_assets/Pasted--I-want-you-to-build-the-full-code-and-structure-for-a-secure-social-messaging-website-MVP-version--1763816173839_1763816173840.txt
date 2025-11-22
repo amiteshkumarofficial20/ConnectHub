@@ -1,0 +1,152 @@
+“I want you to build the full code and structure for a secure social-messaging website (MVP version).
+This website should combine features similar to WhatsApp (chat), Instagram (posts), and Telegram (channels), but simpler for now.
+Do NOT generate any mobile app code. Only the website.
+
+1. Core Website Features
+
+Build these features:
+
+User
+
+Signup / Login (email or phone + password/OTP)
+
+User profiles (name, username, bio, DP)
+
+Edit profile
+
+Search users
+
+Messaging
+
+Real-time one-to-one chat
+
+Seen indicators
+
+Media messages (images/videos)
+
+Online/offline indicator
+
+WebSocket or Socket.io
+
+Posts (Instagram-style but simple)
+
+Create posts (image/video/text)
+
+Feed page
+
+Like + comment
+
+User timeline
+
+Groups/Channels (simple Telegram style)
+
+Create group
+
+Add members
+
+Group chat
+
+Admin tools (remove, mute)
+
+Other
+
+Notifications (basic)
+
+Settings page
+
+Logout
+
+2. Tech Stack
+
+Use:
+
+Frontend
+
+React or Next.js
+
+Global CSS or Tailwind
+
+Axios for API calls
+
+Backend
+
+Node.js + Express
+
+JWT authentication
+
+Bcrypt password hashing
+
+Socket.io for real-time messaging
+
+Database
+
+MongoDB + Mongoose
+
+Storage
+
+Local uploads OR S3/Cloudflare R2 (AI can choose)
+
+3. Security Requirements
+
+JWT access + refresh tokens
+
+Rate limiting
+
+Input validation
+
+Sanitization against XSS
+
+CORS + Helmet
+
+Secure cookies (if used)
+
+Password hashing
+
+Protect file uploads
+
+CSRF protection
+
+4. Files to Generate
+Frontend
+
+Pages: Login, Signup, Feed, Profile, Chat, Settings
+
+Components: Navbar, Sidebar, ChatBox, MessageBubble, PostCard, Loader
+
+Utils: API helper, Auth helper
+
+Global CSS
+
+Backend
+
+server.js
+
+Routes: auth, user, chat, post
+
+Controllers for each route
+
+Models (User, Chat, Message, Post)
+
+Middleware: auth, rateLimiter, errorHandler
+
+Utils: token generator, file uploader, encryption
+
+DB connection file
+
+Security config
+
+5. Output Rules
+
+Start by showing only the full folder structure (frontend + backend).
+
+After I say “continue”, generate code file by file, fully complete.
+
+Use comments in code for clarity.
+
+Ensure frontend and backend integrate correctly.
+
+After everything, explain how to install and run the website.
+
+6. Goal
+
+I want a fully functional, secure website MVP, which I can later turn into an app.
