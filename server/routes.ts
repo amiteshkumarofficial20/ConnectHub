@@ -27,7 +27,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   const wss = new WebSocketServer({ server: httpServer, path: '/ws' });
   const connectedClients = new Map<string, WebSocket>();
 
-  wss.on('connection', (ws: WebSocket, req) => {
+  wss.on('connection', (ws: WebSocket, req: any) => {
     let userId: string | null = null;
 
     ws.on('message', async (message: string) => {
@@ -42,9 +42,11 @@ export async function registerRoutes(app: Express): Promise<Server> {
               const decoded = jwt.verify(data.token, JWT_SECRET) as { userId: string };
               if (decoded.userId === data.userId) {
                 userId = data.userId;
-                connectedClients.set(userId, ws);
-                await storage.updateUserOnlineStatus(userId, true);
-                broadcast({ type: 'user_online', userId });
+                if (userId) {
+                  connectedClients.set(userId, ws);
+                  await storage.updateUserOnlineStatus(userId, true);
+                  broadcast({ type: 'user_online', userId });
+                }
               }
             } catch (error) {
               console.error('WebSocket auth error:', error);
@@ -119,7 +121,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     body('email').isEmail().normalizeEmail(),
     body('password').isLength({ min: 6 }),
     body('name').trim().notEmpty().escape(),
-  ], async (req, res) => {
+  ], async (req: any, res: any) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ error: errors.array()[0].msg });
@@ -222,7 +224,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/messages/conversations', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/messages/conversations', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const lastMessages = await storage.getLastMessages(req.userId!);
       const messagesWithSenders: Record<string, any> = {};
@@ -238,7 +240,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/messages/:userId', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/messages/:userId', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const messages = await storage.getMessagesBetweenUsers(req.userId!, req.params.userId);
       const messagesWithSenders = await Promise.all(
@@ -255,7 +257,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/messages', authenticateToken, [
     body('content').trim().notEmpty(),
-  ], async (req: AuthRequest, res) => {
+  ], async (req: AuthRequest, res: any) => {
     try {
       const { content, receiverId, groupId, mediaUrl, mediaType } = req.body;
       const message = await storage.createMessage({
@@ -274,7 +276,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/posts', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/posts', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const posts = await storage.getAllPosts();
       const postsWithAuthors = await Promise.all(
@@ -290,7 +292,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/posts/user/:userId', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/posts/user/:userId', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const posts = await storage.getUserPosts(req.params.userId);
       const postsWithAuthors = await Promise.all(
@@ -306,7 +308,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/posts/likes', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/posts/likes', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const likes = await storage.getUserPostLikes(req.userId!);
       res.json(likes);
@@ -318,7 +320,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/posts', authenticateToken, [
     body('content').optional(),
     body('mediaUrl').optional(),
-  ], async (req: AuthRequest, res) => {
+  ], async (req: AuthRequest, res: any) => {
     try {
       const { content, mediaUrl, mediaType } = req.body;
       if (!content && !mediaUrl) {
@@ -340,7 +342,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.post('/api/posts/:postId/like', authenticateToken, async (req: AuthRequest, res) => {
+  app.post('/api/posts/:postId/like', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const isLiked = await storage.isPostLikedByUser(req.userId!, req.params.postId);
       if (isLiked) {
@@ -354,7 +356,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/posts/comments', authenticateToken, async (req: AuthRequest, res) => {
+  app.get('/api/posts/comments', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const allComments = await storage.getAllPostComments();
       const commentsWithAuthors: Record<string, any[]> = {};
