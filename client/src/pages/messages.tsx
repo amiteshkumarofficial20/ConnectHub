@@ -3,22 +3,53 @@ import { useQuery, useMutation } from '@tanstack/react-query';
 import { ConversationListItem } from '@/components/ConversationListItem';
 import { MessageBubble } from '@/components/MessageBubble';
 import { UserAvatar } from '@/components/UserAvatar';
+import { CallScreen } from '@/components/CallScreen';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Send, Paperclip, Search } from 'lucide-react';
+import { Send, Paperclip, Search, Phone, Video } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { useCalling } from '@/lib/calling';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { User, MessageWithSender } from '@shared/schema';
 
 export default function Messages() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const { initiateCall, callState } = useCalling();
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const handleAudioCall = async () => {
+    if (selectedUserId) {
+      try {
+        await initiateCall(selectedUserId, 'audio');
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Could not start audio call',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
+  const handleVideoCall = async () => {
+    if (selectedUserId) {
+      try {
+        await initiateCall(selectedUserId, 'video');
+      } catch (error) {
+        toast({
+          title: 'Error',
+          description: 'Could not start video call',
+          variant: 'destructive',
+        });
+      }
+    }
+  };
 
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
     queryKey: ['/api/users'],
@@ -74,7 +105,9 @@ export default function Messages() {
   const selectedUser = users?.find((u) => u.id === selectedUserId);
 
   return (
-    <div className="flex-1 flex overflow-hidden">
+    <>
+      {callState.status !== 'idle' && selectedUser && <CallScreen remoteUser={selectedUser} />}
+      <div className="flex-1 flex overflow-hidden">
       <div className="w-80 border-r border-border flex flex-col">
         <div className="p-4 border-b border-border">
           <div className="relative">
@@ -114,13 +147,33 @@ export default function Messages() {
       <div className="flex-1 flex flex-col">
         {selectedUser ? (
           <>
-            <div className="p-4 border-b border-border flex items-center gap-3">
-              <UserAvatar user={selectedUser} size="md" showOnlineStatus isOnline={onlineUsers[selectedUser.id]} />
-              <div>
-                <p className="font-semibold text-base">{selectedUser.name}</p>
-                <p className="text-xs text-muted-foreground">
-                  {onlineUsers[selectedUser.id] ? 'Online' : 'Offline'}
-                </p>
+            <div className="p-4 border-b border-border flex items-center justify-between gap-3">
+              <div className="flex items-center gap-3">
+                <UserAvatar user={selectedUser} size="md" showOnlineStatus isOnline={onlineUsers[selectedUser.id]} />
+                <div>
+                  <p className="font-semibold text-base">{selectedUser.name}</p>
+                  <p className="text-xs text-muted-foreground">
+                    {onlineUsers[selectedUser.id] ? 'Online' : 'Offline'}
+                  </p>
+                </div>
+              </div>
+              <div className="flex gap-2">
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleAudioCall}
+                  data-testid="button-audio-call"
+                >
+                  <Phone className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  onClick={handleVideoCall}
+                  data-testid="button-video-call"
+                >
+                  <Video className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                </Button>
               </div>
             </div>
 
@@ -180,5 +233,6 @@ export default function Messages() {
         )}
       </div>
     </div>
+    </>
   );
 }

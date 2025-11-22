@@ -189,6 +189,31 @@ export const messageReactionsRelations = relations(messageReactions, ({ one }) =
   }),
 }));
 
+export const calls = pgTable("calls", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  callerId: varchar("caller_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  receiverId: varchar("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  callType: text("call_type").notNull(), // 'audio' | 'video'
+  status: text("status").notNull().default('ringing'), // 'ringing' | 'ongoing' | 'ended'
+  startTime: timestamp("start_time"),
+  endTime: timestamp("end_time"),
+  duration: integer("duration"), // in seconds
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const callsRelations = relations(calls, ({ one }) => ({
+  caller: one(users, {
+    fields: [calls.callerId],
+    references: [users.id],
+    relationName: "caller",
+  }),
+  receiver: one(users, {
+    fields: [calls.receiverId],
+    references: [users.id],
+    relationName: "receiver",
+  }),
+}));
+
 export const insertUserSchema = createInsertSchema(users).pick({
   username: true,
   email: true,

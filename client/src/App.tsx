@@ -7,6 +7,7 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { AuthProvider, useAuth } from "@/lib/auth";
 import { WebSocketProvider } from "@/lib/websocket";
+import { CallingProvider } from "@/lib/calling";
 import { ThemeToggle } from "@/components/ThemeToggle";
 import Login from "@/pages/login";
 import Signup from "@/pages/signup";
@@ -171,8 +172,10 @@ function App() {
       <TooltipProvider>
         <AuthProvider>
           <WebSocketProvider>
-            <Toaster />
-            <Router />
+            <CallingProvider>
+              <Toaster />
+              <Router />
+            </CallingProvider>
           </WebSocketProvider>
         </AuthProvider>
       </TooltipProvider>
