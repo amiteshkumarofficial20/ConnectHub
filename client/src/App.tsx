@@ -159,54 +159,6 @@ function Router() {
           />
         )}
       </Route>
-      
-      <Route path="/messages">
-        {() => (
-          <ProtectedRoute
-            component={() => (
-              <AppLayout>
-                <Messages />
-              </AppLayout>
-            )}
-          />
-        )}
-      </Route>
-      
-      <Route path="/groups">
-        {() => (
-          <ProtectedRoute
-            component={() => (
-              <AppLayout>
-                <Groups />
-              </AppLayout>
-            )}
-          />
-        )}
-      </Route>
-      
-      <Route path="/profile">
-        {() => (
-          <ProtectedRoute
-            component={() => (
-              <AppLayout>
-                <Profile />
-              </AppLayout>
-            )}
-          />
-        )}
-      </Route>
-      
-      <Route path="/settings">
-        {() => (
-          <ProtectedRoute
-            component={() => (
-              <AppLayout>
-                <Settings />
-              </AppLayout>
-            )}
-          />
-        )}
-      </Route>
 
       <Route component={NotFound} />
     </Switch>
