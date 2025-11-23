@@ -7,7 +7,9 @@ import { CallScreen } from '@/components/CallScreen';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Send, Paperclip, Search, Phone, Video } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Send, Paperclip, Search, Phone, Video, User as UserIcon, MoreVertical, Ban } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { useCalling } from '@/lib/calling';
@@ -21,6 +23,8 @@ export default function Messages() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [messageText, setMessageText] = useState('');
   const [searchQuery, setSearchQuery] = useState('');
+  const [blockDialogOpen, setBlockDialogOpen] = useState(false);
+  const [blockedUserDetails, setBlockedUserDetails] = useState<{ id: string; name: string } | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const handleAudioCall = async () => {
@@ -49,6 +53,23 @@ export default function Messages() {
         });
       }
     }
+  };
+
+  const handleBlockUser = () => {
+    if (selectedUser) {
+      setBlockedUserDetails({ id: selectedUser.id, name: selectedUser.name });
+      setBlockDialogOpen(true);
+    }
+  };
+
+  const confirmBlockUser = () => {
+    setBlockDialogOpen(false);
+    toast({
+      title: 'User Blocked',
+      description: `${blockedUserDetails?.name} (ID: ${blockedUserDetails?.id}) has been blocked`,
+      variant: 'default',
+    });
+    setBlockedUserDetails(null);
   };
 
   const { data: users, isLoading: usersLoading } = useQuery<User[]>({
@@ -107,6 +128,31 @@ export default function Messages() {
   return (
     <>
       {callState.status !== 'idle' && selectedUser && <CallScreen remoteUser={selectedUser} />}
+      
+      <AlertDialog open={blockDialogOpen} onOpenChange={setBlockDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Block User</AlertDialogTitle>
+            <AlertDialogDescription>
+              You are about to block <span className="font-semibold text-foreground">{blockedUserDetails?.name}</span>
+              <br />
+              <span className="text-xs text-muted-foreground mt-2 block">User ID: {blockedUserDetails?.id}</span>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <div className="mt-4 p-3 bg-destructive/10 rounded-md">
+            <p className="text-sm text-foreground">
+              This user will no longer be able to message you or see your profile.
+            </p>
+          </div>
+          <div className="flex gap-3 justify-end mt-4">
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmBlockUser} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Block User
+            </AlertDialogAction>
+          </div>
+        </AlertDialogContent>
+      </AlertDialog>
+
       <div className="flex-1 flex overflow-hidden">
       <div className="w-80 border-r border-border flex flex-col">
         <div className="p-4 border-b border-border">
@@ -157,7 +203,7 @@ export default function Messages() {
                   </p>
                 </div>
               </div>
-              <div className="flex gap-2">
+              <div className="flex gap-2 items-center">
                 <Button 
                   variant="ghost" 
                   size="icon" 
@@ -166,14 +212,34 @@ export default function Messages() {
                 >
                   <Phone className="w-5 h-5 text-muted-foreground hover:text-foreground" />
                 </Button>
-                <Button 
-                  variant="ghost" 
-                  size="icon" 
-                  onClick={handleVideoCall}
-                  data-testid="button-video-call"
-                >
-                  <Video className="w-5 h-5 text-muted-foreground hover:text-foreground" />
-                </Button>
+                <div className="flex items-center gap-1">
+                  <UserIcon className="w-4 h-4 text-muted-foreground" data-testid="icon-user-video" />
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={handleVideoCall}
+                    data-testid="button-video-call"
+                  >
+                    <Video className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                  </Button>
+                </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      data-testid="button-more-options"
+                    >
+                      <MoreVertical className="w-5 h-5 text-muted-foreground hover:text-foreground" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={handleBlockUser} className="text-destructive">
+                      <Ban className="w-4 h-4 mr-2" />
+                      Block User
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
             </div>
 
