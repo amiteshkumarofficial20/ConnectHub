@@ -156,22 +156,24 @@ export function AppSidebar() {
                     return (
                       <div key={`feed-${item.title}`}>
                         {menuItem}
-                        <button
-                          onClick={() => setStatusOpen(true)}
-                          className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left"
-                          data-testid="button-add-status"
-                        >
-                          <Sparkles className="w-5 h-5" />
-                          <span>Add Status</span>
-                        </button>
-                        <button
-                          onClick={() => setPostOpen(true)}
-                          className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left"
-                          data-testid="button-create-post"
-                        >
-                          <PlusCircle className="w-5 h-5" />
-                          <span>Create Post</span>
-                        </button>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton
+                            onClick={() => setStatusOpen(true)}
+                            data-testid="button-add-status"
+                          >
+                            <Sparkles className="w-5 h-5" />
+                            <span>Add Status</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
+                        <SidebarMenuItem>
+                          <SidebarMenuButton
+                            onClick={() => setPostOpen(true)}
+                            data-testid="button-create-post"
+                          >
+                            <PlusCircle className="w-5 h-5" />
+                            <span>Create Post</span>
+                          </SidebarMenuButton>
+                        </SidebarMenuItem>
                       </div>
                     );
                   }
