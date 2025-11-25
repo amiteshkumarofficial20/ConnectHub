@@ -152,8 +152,16 @@ export default function Settings() {
           <h2 className="text-lg font-semibold mb-4">Account Information</h2>
           <div className="space-y-3 text-sm">
             <div className="flex justify-between">
+              <span className="text-muted-foreground">Name</span>
+              <span className="font-medium">{user.name}</span>
+            </div>
+            <div className="flex justify-between">
               <span className="text-muted-foreground">Email</span>
               <span className="font-medium">{user.email}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Username</span>
+              <span className="font-medium">@{user.username}</span>
             </div>
             {user.phone && (
               <div className="flex justify-between">
@@ -161,10 +169,18 @@ export default function Settings() {
                 <span className="font-medium">{user.phone}</span>
               </div>
             )}
-            <div className="flex justify-between">
-              <span className="text-muted-foreground">Username</span>
-              <span className="font-medium">@{user.username}</span>
-            </div>
+            {user.createdAt && (
+              <div className="flex justify-between">
+                <span className="text-muted-foreground">Account Created</span>
+                <span className="font-medium">{new Date(user.createdAt).toLocaleDateString('en-US', { 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric',
+                  hour: '2-digit',
+                  minute: '2-digit'
+                })}</span>
+              </div>
+            )}
           </div>
         </Card>
       </div>
