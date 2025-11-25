@@ -93,7 +93,21 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateUserProfile(userId: string, data: Partial<User>): Promise<User> {
-    const [updated] = await db.update(users).set(data).where(eq(users.id, userId)).returning();
+    // Get current user to track changes
+    const [currentUser] = await db.select().from(users).where(eq(users.id, userId));
+    const updateData: any = { ...data };
+    
+    // Track email changes
+    if (data.email && data.email !== currentUser.email) {
+      updateData.emailChangeCount = sql`${users.emailChangeCount} + 1`;
+    }
+    
+    // Track username changes
+    if (data.username && data.username !== currentUser.username) {
+      updateData.usernameChangeCount = sql`${users.usernameChangeCount} + 1`;
+    }
+    
+    const [updated] = await db.update(users).set(updateData).where(eq(users.id, userId)).returning();
     return updated;
   }
 

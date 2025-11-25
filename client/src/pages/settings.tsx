@@ -169,6 +169,14 @@ export default function Settings() {
                 <span className="font-medium">{user.phone}</span>
               </div>
             )}
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Email Changes</span>
+              <span className="font-medium">{(user as any).emailChangeCount || 0} times</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-muted-foreground">Username Changes</span>
+              <span className="font-medium">{(user as any).usernameChangeCount || 0} times</span>
+            </div>
             {user.createdAt && (
               <div className="flex justify-between">
                 <span className="text-muted-foreground">Account Created</span>

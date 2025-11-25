@@ -16,6 +16,8 @@ export const users = pgTable("users", {
   isVerified: boolean("is_verified").default(false),
   lastSeen: timestamp("last_seen"),
   createdAt: timestamp("created_at").defaultNow(),
+  emailChangeCount: integer("email_change_count").default(0),
+  usernameChangeCount: integer("username_change_count").default(0),
 });
 
 export const messages = pgTable("messages", {
