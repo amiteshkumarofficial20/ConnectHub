@@ -1,5 +1,5 @@
 import { 
-  users, messages, posts, postLikes, comments, groups, groupMembers, notifications,
+  users, messages, posts, postLikes, comments, groups, groupMembers, notifications, friendRequests,
   type User, type InsertUser, type Message, type InsertMessage,
   type Post, type InsertPost, type Comment, type InsertComment,
   type Group, type InsertGroup, type GroupMember, type Notification
@@ -48,6 +48,12 @@ export interface IStorage {
   createNotification(notification: Omit<Notification, 'id' | 'createdAt'>): Promise<Notification>;
   getUserNotifications(userId: string): Promise<Notification[]>;
   markNotificationAsRead(notificationId: string): Promise<void>;
+  
+  searchUsers(query: string, excludeUserId: string): Promise<User[]>;
+  sendFriendRequest(senderId: string, receiverId: string): Promise<void>;
+  acceptFriendRequest(requestId: string): Promise<void>;
+  rejectFriendRequest(requestId: string): Promise<void>;
+  getPendingRequests(userId: string): Promise<any[]>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -279,6 +285,61 @@ export class DatabaseStorage implements IStorage {
 
   async markNotificationAsRead(notificationId: string): Promise<void> {
     await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, notificationId));
+  }
+
+  async searchUsers(query: string, excludeUserId: string): Promise<User[]> {
+    const results = await db.select().from(users).where(
+      and(
+        or(
+          sql`${users.username} ILIKE ${`%${query}%`}`,
+          sql`${users.name} ILIKE ${`%${query}%`}`,
+          sql`${users.email} ILIKE ${`%${query}%`}`
+        ),
+        sql`${users.id} != ${excludeUserId}`
+      )
+    ).limit(20);
+    return results;
+  }
+
+  async sendFriendRequest(senderId: string, receiverId: string): Promise<void> {
+    const existing = await db.select().from(friendRequests).where(
+      and(
+        eq(friendRequests.senderId, senderId),
+        eq(friendRequests.receiverId, receiverId)
+      )
+    );
+
+    if (existing.length === 0) {
+      await db.insert(friendRequests).values({
+        senderId,
+        receiverId,
+        status: 'pending'
+      });
+    }
+  }
+
+  async acceptFriendRequest(requestId: string): Promise<void> {
+    await db.update(friendRequests).set({ status: 'accepted' }).where(eq(friendRequests.id, requestId));
+  }
+
+  async rejectFriendRequest(requestId: string): Promise<void> {
+    await db.update(friendRequests).set({ status: 'rejected' }).where(eq(friendRequests.id, requestId));
+  }
+
+  async getPendingRequests(userId: string): Promise<any[]> {
+    const requests = await db.select().from(friendRequests).where(
+      and(
+        eq(friendRequests.receiverId, userId),
+        eq(friendRequests.status, 'pending')
+      )
+    );
+    const withSenders = await Promise.all(
+      requests.map(async (req) => {
+        const sender = await this.getUser(req.senderId);
+        return { ...req, sender };
+      })
+    );
+    return withSenders;
   }
 }
 

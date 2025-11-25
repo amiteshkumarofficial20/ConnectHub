@@ -13,6 +13,7 @@ import Login from "@/pages/login";
 import Signup from "@/pages/signup";
 import Feed from "@/pages/feed";
 import Messages from "@/pages/messages";
+import Friends from "@/pages/friends";
 import Groups from "@/pages/groups";
 import Profile from "@/pages/profile";
 import Settings from "@/pages/settings";
@@ -107,6 +108,18 @@ function Router() {
             component={() => (
               <AppLayout>
                 <Messages />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
+      <Route path="/friends">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Friends />
               </AppLayout>
             )}
           />

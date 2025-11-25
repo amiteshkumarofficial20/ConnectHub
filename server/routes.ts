@@ -168,7 +168,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/auth/login', [
     body('emailOrPhone').trim().notEmpty(),
     body('password').notEmpty(),
-  ], async (req, res) => {
+  ], async (req: any, res: any) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res.status(400).json({ error: 'Invalid input' });
@@ -225,6 +225,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/users/search/:query', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const results = await storage.searchUsers(req.params.query, req.userId!);
+      const withoutPasswords = results.map(({ password, ...user }) => user);
+      res.json(withoutPasswords);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to search users' });
+    }
+  });
+
+  app.post('/api/friend-requests', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const { receiverId } = req.body;
+      await storage.sendFriendRequest(req.userId!, receiverId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to send friend request' });
+    }
+  });
+
+  app.get('/api/friend-requests/pending', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const requests = await storage.getPendingRequests(req.userId!);
+      res.json(requests);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch requests' });
+    }
+  });
+
+  app.patch('/api/friend-requests/:requestId/accept', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      await storage.acceptFriendRequest(req.params.requestId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to accept request' });
+    }
+  });
+
+  app.patch('/api/friend-requests/:requestId/reject', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      await storage.rejectFriendRequest(req.params.requestId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to reject request' });
+    }
+  });
+
   app.get('/api/messages/conversations', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const lastMessages = await storage.getLastMessages(req.userId!);
@@ -277,7 +324,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
-  app.get('/api/posts', authenticateToken, async (req: AuthRequest, res: any) => {
+  app.get('/api/posts', authenticateToken, async (req: AuthRequest, res: any): Promise<void> => {
     try {
       const posts = await storage.getAllPosts();
       const postsWithAuthors = await Promise.all(
@@ -321,7 +368,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/posts', authenticateToken, [
     body('content').optional(),
     body('mediaUrl').optional(),
-  ], async (req: AuthRequest, res: any) => {
+  ], async (req: AuthRequest, res: any): Promise<void> => {
     try {
       const { content, mediaUrl, mediaType } = req.body;
       if (!content && !mediaUrl) {

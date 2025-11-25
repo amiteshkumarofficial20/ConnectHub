@@ -12,12 +12,13 @@ import {
 } from '@/components/ui/sidebar';
 import { UserAvatar } from '@/components/UserAvatar';
 import { useAuth } from '@/lib/auth';
-import { Home, MessageCircle, Users, User, Settings, LogOut, Bell } from 'lucide-react';
+import { Home, MessageCircle, Users, User, Settings, LogOut, Bell, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 const menuItems = [
   { title: 'Feed', icon: Home, path: '/' },
   { title: 'Messages', icon: MessageCircle, path: '/messages' },
+  { title: 'Friends', icon: UserPlus, path: '/friends' },
   { title: 'Groups', icon: Users, path: '/groups' },
   { title: 'Notifications', icon: Bell, path: '/notifications' },
   { title: 'Profile', icon: User, path: '/profile' },

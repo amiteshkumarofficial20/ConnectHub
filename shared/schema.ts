@@ -201,6 +201,14 @@ export const calls = pgTable("calls", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const friendRequests = pgTable("friend_requests", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  senderId: varchar("sender_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  receiverId: varchar("receiver_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default('pending'), // 'pending' | 'accepted' | 'rejected'
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
 export const callsRelations = relations(calls, ({ one }) => ({
   caller: one(users, {
     fields: [calls.callerId],
@@ -211,6 +219,19 @@ export const callsRelations = relations(calls, ({ one }) => ({
     fields: [calls.receiverId],
     references: [users.id],
     relationName: "receiver",
+  }),
+}));
+
+export const friendRequestsRelations = relations(friendRequests, ({ one }) => ({
+  sender: one(users, {
+    fields: [friendRequests.senderId],
+    references: [users.id],
+    relationName: "sentRequests",
+  }),
+  receiver: one(users, {
+    fields: [friendRequests.receiverId],
+    references: [users.id],
+    relationName: "receivedRequests",
   }),
 }));
 
