@@ -33,11 +33,11 @@ export default function Friends() {
     },
   });
 
-  const { data: pendingRequests = [] } = useQuery({
+  const { data: pendingRequests = [] } = useQuery<any[]>({
     queryKey: ['/api/friend-requests/pending'],
   });
 
-  const { data: sentRequests = [] } = useQuery({
+  const { data: sentRequests = [] } = useQuery<string[]>({
     queryKey: ['/api/friend-requests/sent'],
   });
 

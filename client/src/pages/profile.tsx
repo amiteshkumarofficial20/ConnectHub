@@ -26,7 +26,10 @@ export default function Profile() {
     queryKey: ['/api/users', profileUserId],
     enabled: !!profileUserId && !isOwnProfile,
     queryFn: async () => {
-      const response = await fetch(`/api/users/${profileUserId}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/${profileUserId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) throw new Error('Failed to fetch user');
       return response.json();
     },
@@ -34,25 +37,37 @@ export default function Profile() {
 
   const displayUser = isOwnProfile ? currentUser : profileUser;
 
-  const { data: userPosts, isLoading: postsLoading } = useQuery<PostWithAuthor[]>({
+  const { data: userPosts = [], isLoading: postsLoading } = useQuery<PostWithAuthor[]>({
     queryKey: ['/api/posts/user', profileUserId],
+    enabled: !!profileUserId,
+    queryFn: async () => {
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/posts/user/${profileUserId}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      if (!response.ok) throw new Error('Failed to fetch posts');
+      return response.json();
+    },
   });
 
   const { data: followerStats = { followers: 0, following: 0 } } = useQuery({
     queryKey: ['/api/users/stats', profileUserId],
     enabled: !!profileUserId,
     queryFn: async () => {
-      const response = await fetch(`/api/users/${profileUserId}/stats`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/${profileUserId}/stats`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
       if (!response.ok) return { followers: 0, following: 0 };
       return response.json();
     },
   });
 
-  const { data: sentRequests = [] } = useQuery({
+  const { data: sentRequests = [] } = useQuery<string[]>({
     queryKey: ['/api/friend-requests/sent'],
   });
 
-  const isSent = sentRequests.includes(profileUserId!);
+  const isSent = profileUserId ? sentRequests?.includes(profileUserId) : false;
 
   const sendRequestMutation = useMutation({
     mutationFn: async () => {
