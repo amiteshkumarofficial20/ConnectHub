@@ -38,6 +38,9 @@ const menuItems = [
   { title: 'Settings', icon: Settings, path: '/settings' },
 ];
 
+const feedIndex = menuItems.findIndex(item => item.title === 'Feed');
+const messagesIndex = menuItems.findIndex(item => item.title === 'Messages');
+
 export function AppSidebar() {
   const [location, setLocation] = useLocation();
   const { user, logout } = useAuth();
@@ -131,9 +134,11 @@ export function AppSidebar() {
           <SidebarGroup>
             <SidebarGroupContent>
               <SidebarMenu>
-                {menuItems.map((item) => {
+                {menuItems.map((item, index) => {
                   const isActive = location === item.path;
-                  return (
+                  
+                  // Render menu item
+                  const menuItem = (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
                         onClick={() => setLocation(item.path)}
@@ -145,32 +150,35 @@ export function AppSidebar() {
                       </SidebarMenuButton>
                     </SidebarMenuItem>
                   );
+
+                  // Insert action buttons after Feed and before Messages
+                  if (index === feedIndex) {
+                    return (
+                      <div key={`feed-${item.title}`}>
+                        {menuItem}
+                        <button
+                          onClick={() => setStatusOpen(true)}
+                          className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left text-sm"
+                          data-testid="button-add-status"
+                        >
+                          <Sparkles className="w-5 h-5" />
+                          <span>Add Status</span>
+                        </button>
+                        <button
+                          onClick={() => setPostOpen(true)}
+                          className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left text-sm"
+                          data-testid="button-create-post"
+                        >
+                          <PlusCircle className="w-5 h-5" />
+                          <span>Create Post</span>
+                        </button>
+                      </div>
+                    );
+                  }
+
+                  return menuItem;
                 })}
               </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-
-          {/* Action Buttons */}
-          <SidebarGroup className="mt-4 pt-4 border-t">
-            <SidebarGroupContent>
-              <div className="space-y-2">
-                <button
-                  onClick={() => setStatusOpen(true)}
-                  className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left"
-                  data-testid="button-add-status"
-                >
-                  <Sparkles className="w-5 h-5" />
-                  <span>Add Status</span>
-                </button>
-                <button
-                  onClick={() => setPostOpen(true)}
-                  className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left"
-                  data-testid="button-create-post"
-                >
-                  <PlusCircle className="w-5 h-5" />
-                  <span>Create Post</span>
-                </button>
-              </div>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
