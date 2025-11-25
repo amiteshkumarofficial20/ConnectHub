@@ -27,11 +27,13 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
     if (!content.trim() && !mediaUrl) return;
     setIsSubmitting(true);
     try {
-      await onCreatePost(content, mediaUrl || undefined, mediaType || undefined);
+      await onCreatePost(content.trim(), mediaUrl || undefined, mediaType || undefined);
       setContent('');
       setMediaUrl('');
       setMediaType('');
       setOpen(false);
+    } catch (error) {
+      console.error('Failed to create post:', error);
     } finally {
       setIsSubmitting(false);
     }

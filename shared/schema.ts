@@ -259,7 +259,10 @@ export const insertPostSchema = createInsertSchema(posts).pick({
   content: true,
   mediaUrl: true,
   mediaType: true,
-});
+}).refine(
+  (data) => data.content || data.mediaUrl,
+  { message: "Post must have content or media" }
+);
 
 export const insertCommentSchema = createInsertSchema(comments).pick({
   content: true,
