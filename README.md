@@ -667,9 +667,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 👥 Authors & Attribution
 
-- **Lead Developer**: Your Name
-- **Design**: Material Design 3 Principles
-- **Infrastructure**: Replit Platform
+- **Lead Developer**: Amitesh Kumar
 
 ---
 
