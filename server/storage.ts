@@ -54,6 +54,8 @@ export interface IStorage {
   acceptFriendRequest(requestId: string): Promise<void>;
   rejectFriendRequest(requestId: string): Promise<void>;
   getPendingRequests(userId: string): Promise<any[]>;
+  countFollowers(userId: string): Promise<number>;
+  countFollowing(userId: string): Promise<number>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -340,6 +342,26 @@ export class DatabaseStorage implements IStorage {
       })
     );
     return withSenders;
+  }
+
+  async countFollowers(userId: string): Promise<number> {
+    const followers = await db.select().from(friendRequests).where(
+      and(
+        eq(friendRequests.receiverId, userId),
+        eq(friendRequests.status, 'accepted')
+      )
+    );
+    return followers.length;
+  }
+
+  async countFollowing(userId: string): Promise<number> {
+    const following = await db.select().from(friendRequests).where(
+      and(
+        eq(friendRequests.senderId, userId),
+        eq(friendRequests.status, 'accepted')
+      )
+    );
+    return following.length;
   }
 }
 

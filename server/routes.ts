@@ -526,5 +526,33 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/users/:userId', authenticateToken, async (req: AuthRequest, res: any): Promise<void> => {
+    try {
+      const user = await storage.getUser(req.params.userId);
+      if (!user) {
+        return res.status(404).json({ error: 'User not found' });
+      }
+      const { password, ...userWithoutPassword } = user;
+      res.json(userWithoutPassword);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch user' });
+    }
+  });
+
+  app.get('/api/users/:userId/stats', authenticateToken, async (req: AuthRequest, res: any): Promise<void> => {
+    try {
+      const userId = req.params.userId;
+      
+      // Count followers (people who have sent accepted friend requests to this user)
+      const followers = await storage.countFollowers(userId);
+      // Count following (people this user has sent accepted friend requests to)
+      const following = await storage.countFollowing(userId);
+      
+      res.json({ followers, following });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+  });
+
   return httpServer;
 }

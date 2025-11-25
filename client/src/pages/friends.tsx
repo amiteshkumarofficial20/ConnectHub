@@ -8,12 +8,14 @@ import { UserAvatar } from '@/components/UserAvatar';
 import { Search, UserPlus, Check, X } from 'lucide-react';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
+import { useLocation } from 'wouter';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import type { User } from '@shared/schema';
 
 export default function Friends() {
   const { user } = useAuth();
   const { toast } = useToast();
+  const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 
   const { data: searchResults, isLoading: searchLoading } = useQuery<User[]>({
@@ -147,9 +149,9 @@ export default function Friends() {
             ) : searchResults && searchResults.length > 0 ? (
               <div className="space-y-3">
                 {searchResults.map((searchUser) => (
-                  <Card key={searchUser.id} className="p-4">
+                  <Card key={searchUser.id} className="p-4 cursor-pointer hover-elevate" onClick={() => setLocation(`/profile/${searchUser.id}`)} data-testid={`card-user-${searchUser.id}`}>
                     <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1">
+                      <div className="flex items-center gap-3 flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
                         <UserAvatar user={searchUser} size="md" />
                         <div className="flex-1 min-w-0">
                           <p className="font-semibold text-foreground">{searchUser.name}</p>
@@ -158,7 +160,10 @@ export default function Friends() {
                       </div>
                       <Button
                         size="sm"
-                        onClick={() => sendRequestMutation.mutate(searchUser.id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          sendRequestMutation.mutate(searchUser.id);
+                        }}
                         disabled={sendRequestMutation.isPending}
                         data-testid={`button-add-friend-${searchUser.id}`}
                       >
