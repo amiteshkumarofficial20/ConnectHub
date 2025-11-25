@@ -94,6 +94,23 @@ export const messageReactions = pgTable("message_reactions", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const statuses = pgTable("statuses", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  userId: varchar("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  content: text("content").notNull(),
+  mediaUrl: text("media_url"),
+  mediaType: text("media_type"),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const statusesRelations = relations(statuses, ({ one }) => ({
+  user: one(users, {
+    fields: [statuses.userId],
+    references: [users.id],
+  }),
+}));
+
 export const usersRelations = relations(users, ({ many }) => ({
   sentMessages: many(messages, { relationName: "sender" }),
   receivedMessages: many(messages, { relationName: "receiver" }),
@@ -103,6 +120,7 @@ export const usersRelations = relations(users, ({ many }) => ({
   createdGroups: many(groups),
   groupMemberships: many(groupMembers),
   notifications: many(notifications),
+  statuses: many(statuses),
 }));
 
 export const messagesRelations = relations(messages, ({ one }) => ({
