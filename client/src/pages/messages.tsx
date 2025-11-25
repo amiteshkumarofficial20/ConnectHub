@@ -119,7 +119,7 @@ export default function Messages() {
   const filteredUsers = users?.filter(
     (u) =>
       u.id !== user?.id &&
-      (u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (!searchQuery || u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
         u.username.toLowerCase().includes(searchQuery.toLowerCase()))
   );
 

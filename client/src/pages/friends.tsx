@@ -18,20 +18,19 @@ export default function Friends() {
   const [, setLocation] = useLocation();
   const [searchQuery, setSearchQuery] = useState('');
 
-  const { data: searchResults, isLoading: searchLoading } = useQuery<User[]>({
-    queryKey: ['/api/users/search', searchQuery],
-    queryFn: async () => {
-      if (!searchQuery.trim()) return [];
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/search/${encodeURIComponent(searchQuery)}`, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-        }
-      });
-      if (!response.ok) throw new Error('Search failed');
-      return response.json();
-    },
+  const { data: allUsers = [] } = useQuery<User[]>({
+    queryKey: ['/api/users'],
   });
+
+  const searchResults = searchQuery.trim() 
+    ? allUsers.filter(
+        (u) =>
+          u.id !== user?.id &&
+          (u.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.username.toLowerCase().includes(searchQuery.toLowerCase()) ||
+            u.email.toLowerCase().includes(searchQuery.toLowerCase()))
+      )
+    : [];
 
   const { data: pendingRequests = [] } = useQuery<any[]>({
     queryKey: ['/api/friend-requests/pending'],
@@ -51,7 +50,6 @@ export default function Friends() {
         description: 'Friend request sent!',
       });
       queryClient.invalidateQueries({ queryKey: ['/api/friend-requests/sent'] });
-      queryClient.invalidateQueries({ queryKey: ['/api/users/search', searchQuery] });
     },
     onError: () => {
       toast({
@@ -158,13 +156,7 @@ export default function Friends() {
         {searchQuery && (
           <div>
             <h2 className="text-lg font-semibold text-foreground mb-4">Search Results</h2>
-            {searchLoading ? (
-              <div className="space-y-3">
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-20 w-full" />
-                <Skeleton className="h-20 w-full" />
-              </div>
-            ) : searchResults && searchResults.length > 0 ? (
+            {searchResults && searchResults.length > 0 ? (
               <div className="space-y-3">
                 {searchResults.map((searchUser) => {
                   const isOwnProfile = searchUser.id === user?.id;

@@ -124,7 +124,7 @@ export function MessageBubble({ message, isSent, onBlock, onReport, onDelete }: 
               <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
               <div className={`flex items-center justify-end gap-1 mt-1 ${isSent ? 'opacity-70' : ''}`}>
                 <span className="text-xs">
-                  {formatDistanceToNow(new Date(message.createdAt), { addSuffix: false })}
+                  {message.createdAt ? formatDistanceToNow(new Date(message.createdAt), { addSuffix: false }) : 'just now'}
                 </span>
                 {isSent && (
                   message.isRead ? (
