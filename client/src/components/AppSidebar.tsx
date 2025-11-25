@@ -9,8 +9,10 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
+  SidebarSeparator,
 } from '@/components/ui/sidebar';
 import { UserAvatar } from '@/components/UserAvatar';
+import { SidebarActions } from '@/components/SidebarActions';
 import { useAuth } from '@/lib/auth';
 import { Home, MessageCircle, Users, User, Settings, LogOut, Bell, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -51,6 +53,30 @@ export function AppSidebar() {
             <SidebarMenu>
               {menuItems.map((item) => {
                 const isActive = location === item.path;
+                
+                // Render action buttons after Feed and before Messages
+                if (item.title === 'Messages') {
+                  return (
+                    <div key="actions">
+                      <SidebarSeparator className="my-2" />
+                      <div className="px-2 py-2 space-y-1">
+                        <SidebarActions />
+                      </div>
+                      <SidebarSeparator className="my-2" />
+                      <SidebarMenuItem>
+                        <SidebarMenuButton
+                          onClick={() => setLocation(item.path)}
+                          isActive={isActive}
+                          data-testid={`link-${item.title.toLowerCase()}`}
+                        >
+                          <item.icon className="w-5 h-5" />
+                          <span>{item.title}</span>
+                        </SidebarMenuButton>
+                      </SidebarMenuItem>
+                    </div>
+                  );
+                }
+
                 return (
                   <SidebarMenuItem key={item.title}>
                     <SidebarMenuButton

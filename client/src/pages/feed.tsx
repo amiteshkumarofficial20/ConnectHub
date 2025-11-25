@@ -1,7 +1,5 @@
 import { useQuery, useMutation } from '@tanstack/react-query';
 import { PostCard } from '@/components/PostCard';
-import { CreatePostDialog } from '@/components/CreatePostDialog';
-import { StatusBar } from '@/components/StatusBar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
@@ -86,23 +84,6 @@ export default function Feed() {
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <div className="max-w-2xl mx-auto">
-        {/* Status Section */}
-        <div className="mb-8">
-          <StatusBar />
-        </div>
-
-        {/* Create Post Section */}
-        <div className="mb-8">
-          <CreatePostDialog onCreatePost={async (content, mediaUrl, mediaType) => {
-            try {
-              await createPostMutation.mutateAsync({ content, mediaUrl, mediaType });
-            } catch (error) {
-              console.error('Error creating post:', error);
-              throw error;
-            }
-          }} />
-        </div>
-
         {/* Feed Section */}
         <div className="space-y-6">
           <h2 className="text-xl font-bold">Feed</h2>
