@@ -42,7 +42,7 @@ export default function Profile() {
     enabled: !!profileUserId,
   });
 
-  const { data: followerStats = { followers: 0, following: 0 } } = useQuery({
+  const { data: followerStats = { followers: 0, following: 0 } } = useQuery<{ followers: number; following: number }>({
     queryKey: ['/api/users/stats', profileUserId],
     enabled: !!profileUserId,
   });

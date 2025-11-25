@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { UserAvatar } from '@/components/UserAvatar';
+import { EditableAvatar } from '@/components/EditableAvatar';
 import { useAuth } from '@/lib/auth';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest } from '@/lib/queryClient';
@@ -16,7 +16,6 @@ import { apiRequest } from '@/lib/queryClient';
 const updateProfileSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   bio: z.string().optional(),
-  profilePicture: z.string().url().optional().or(z.literal('')),
 });
 
 type UpdateProfileData = z.infer<typeof updateProfileSchema>;
@@ -31,9 +30,28 @@ export default function Settings() {
     defaultValues: {
       name: user?.name || '',
       bio: user?.bio || '',
-      profilePicture: user?.profilePicture || '',
     },
   });
+
+  const handleProfilePictureUpdate = async (pictureUrl: string | null) => {
+    try {
+      const updatedUser = await apiRequest('PATCH', '/api/users/profile', { 
+        profilePicture: pictureUrl 
+      });
+      setUser(updatedUser);
+      localStorage.setItem('user', JSON.stringify(updatedUser));
+      toast({
+        title: 'Success',
+        description: 'Profile picture updated successfully.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Could not update profile picture',
+        variant: 'destructive',
+      });
+    }
+  };
 
   const onSubmit = async (data: UpdateProfileData) => {
     setIsSubmitting(true);
@@ -70,8 +88,8 @@ export default function Settings() {
           <h2 className="text-lg font-semibold mb-6">Profile Information</h2>
           
           <div className="flex flex-col items-center mb-6">
-            <UserAvatar user={user} size="xl" className="mb-4" />
-            <p className="text-sm text-muted-foreground">@{user.username}</p>
+            <EditableAvatar user={user} onUpdate={handleProfilePictureUpdate} />
+            <p className="text-sm text-muted-foreground mt-4">@{user.username}</p>
           </div>
 
           <Separator className="my-6" />
@@ -111,27 +129,6 @@ export default function Settings() {
                         className="min-h-[100px]"
                         disabled={isSubmitting}
                         data-testid="input-settings-bio"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="profilePicture"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Profile Picture URL</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="url"
-                        placeholder="https://example.com/avatar.jpg"
-                        disabled={isSubmitting}
-                        className="h-12"
-                        data-testid="input-settings-profile-picture"
                       />
                     </FormControl>
                     <FormMessage />
