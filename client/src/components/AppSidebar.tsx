@@ -30,8 +30,6 @@ import { Home, MessageCircle, Users, User, Settings, LogOut, Bell, UserPlus, Spa
 
 const menuItems = [
   { title: 'Feed', icon: Home, path: '/' },
-  { title: 'Add Status', icon: Sparkles, isAction: true },
-  { title: 'Create Post', icon: PlusCircle, isAction: true },
   { title: 'Messages', icon: MessageCircle, path: '/messages' },
   { title: 'Friends', icon: UserPlus, path: '/friends' },
   { title: 'Groups', icon: Users, path: '/groups' },
@@ -114,16 +112,6 @@ export function AppSidebar() {
 
   if (!user) return null;
 
-  const handleMenuClick = (item: any) => {
-    if (item.title === 'Add Status') {
-      setStatusOpen(true);
-    } else if (item.title === 'Create Post') {
-      setPostOpen(true);
-    } else if (item.path) {
-      setLocation(item.path);
-    }
-  };
-
   return (
     <>
       <Sidebar>
@@ -148,7 +136,7 @@ export function AppSidebar() {
                   return (
                     <SidebarMenuItem key={item.title}>
                       <SidebarMenuButton
-                        onClick={() => handleMenuClick(item)}
+                        onClick={() => setLocation(item.path)}
                         isActive={isActive}
                         data-testid={`link-${item.title.toLowerCase().replace(/\s+/g, '-')}`}
                       >
@@ -159,6 +147,30 @@ export function AppSidebar() {
                   );
                 })}
               </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+
+          {/* Action Buttons */}
+          <SidebarGroup className="mt-4 pt-4 border-t">
+            <SidebarGroupContent>
+              <div className="space-y-2">
+                <button
+                  onClick={() => setStatusOpen(true)}
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left"
+                  data-testid="button-add-status"
+                >
+                  <Sparkles className="w-5 h-5" />
+                  <span>Add Status</span>
+                </button>
+                <button
+                  onClick={() => setPostOpen(true)}
+                  className="w-full flex items-center gap-3 px-4 py-2 rounded-md hover:bg-sidebar-accent text-sidebar-foreground hover:text-sidebar-accent-foreground transition-colors text-left"
+                  data-testid="button-create-post"
+                >
+                  <PlusCircle className="w-5 h-5" />
+                  <span>Create Post</span>
+                </button>
+              </div>
             </SidebarGroupContent>
           </SidebarGroup>
         </SidebarContent>
