@@ -8,7 +8,7 @@ import { Plus, X } from 'lucide-react';
 import { apiRequest, queryClient } from '@/lib/queryClient';
 import { useToast } from '@/hooks/use-toast';
 import type { StatusWithUser } from '@shared/schema';
-import { UserAvatar } from './UserAvatar';
+import { UserAvatar } from '@/components/UserAvatar';
 
 export function StatusBar() {
   const { toast } = useToast();

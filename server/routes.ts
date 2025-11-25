@@ -446,7 +446,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post('/api/comments', authenticateToken, [
     body('content').trim().notEmpty(),
     body('postId').notEmpty(),
-  ], async (req: AuthRequest, res) => {
+  ], async (req: AuthRequest, res: any) => {
     try {
       const { content, postId } = req.body;
       const comment = await storage.createComment({
@@ -496,7 +496,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.post('/api/groups', authenticateToken, [
     body('name').trim().notEmpty(),
-  ], async (req: AuthRequest, res) => {
+  ], async (req: AuthRequest, res: any) => {
     try {
       const { name, description, groupPicture } = req.body;
       const group = await storage.createGroup({
@@ -569,6 +569,69 @@ export async function registerRoutes(app: Express): Promise<Server> {
       res.json({ followers, following });
     } catch (error) {
       res.status(500).json({ error: 'Failed to fetch stats' });
+    }
+  });
+
+  // Status endpoints
+  app.get('/api/statuses', authenticateToken, async (req: AuthRequest, res: any) => {
+    try {
+      const statuses = await storage.getAllActiveStatuses();
+      const statusesWithUsers = await Promise.all(
+        statuses.map(async (status) => {
+          const user = await storage.getUser(status.userId);
+          const { password, ...userWithoutPassword } = user!;
+          return { ...status, user: userWithoutPassword };
+        })
+      );
+      res.json(statusesWithUsers);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch statuses' });
+    }
+  });
+
+  app.get('/api/statuses/:userId', authenticateToken, async (req: AuthRequest, res: any) => {
+    try {
+      const userStatuses = await storage.getUserStatuses(req.params.userId);
+      res.json(userStatuses);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch user statuses' });
+    }
+  });
+
+  app.post('/api/statuses', authenticateToken, [
+    body('content').trim().notEmpty(),
+  ], async (req: AuthRequest, res: any) => {
+    try {
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      const { content, mediaUrl, mediaType } = req.body;
+      const expiresAt = new Date(Date.now() + 24 * 60 * 60 * 1000);
+      
+      const status = await storage.createStatus({
+        content,
+        mediaUrl: mediaUrl || null,
+        mediaType: mediaType || null,
+        expiresAt,
+        userId: req.userId!,
+      });
+
+      const user = await storage.getUser(req.userId!);
+      const { password, ...userWithoutPassword } = user!;
+      res.json({ ...status, user: userWithoutPassword });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to create status' });
+    }
+  });
+
+  app.delete('/api/statuses/:statusId', authenticateToken, async (req: AuthRequest, res: any) => {
+    try {
+      await storage.deleteStatus(req.params.statusId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to delete status' });
     }
   });
 

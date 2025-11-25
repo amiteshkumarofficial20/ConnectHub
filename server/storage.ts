@@ -1,8 +1,8 @@
 import { 
-  users, messages, posts, postLikes, comments, groups, groupMembers, notifications, friendRequests,
+  users, messages, posts, postLikes, comments, groups, groupMembers, notifications, friendRequests, statuses,
   type User, type InsertUser, type Message, type InsertMessage,
   type Post, type InsertPost, type Comment, type InsertComment,
-  type Group, type InsertGroup, type GroupMember, type Notification
+  type Group, type InsertGroup, type GroupMember, type Notification, type Status, type InsertStatus
 } from "@shared/schema";
 import { db } from "./db";
 import { eq, desc, and, or, sql } from "drizzle-orm";
@@ -58,6 +58,11 @@ export interface IStorage {
   getSentRequests(userId: string): Promise<string[]>;
   countFollowers(userId: string): Promise<number>;
   countFollowing(userId: string): Promise<number>;
+
+  createStatus(status: InsertStatus & { userId: string }): Promise<Status>;
+  getUserStatuses(userId: string): Promise<Status[]>;
+  getAllActiveStatuses(): Promise<Status[]>;
+  deleteStatus(statusId: string): Promise<void>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -403,6 +408,24 @@ export class DatabaseStorage implements IStorage {
       )
     );
     return requests.map(r => r.receiverId);
+  }
+
+  async createStatus(status: InsertStatus & { userId: string }): Promise<Status> {
+    const [created] = await db.insert(statuses).values(status).returning();
+    return created;
+  }
+
+  async getUserStatuses(userId: string): Promise<Status[]> {
+    return db.select().from(statuses).where(eq(statuses.userId, userId)).orderBy(desc(statuses.createdAt));
+  }
+
+  async getAllActiveStatuses(): Promise<Status[]> {
+    const now = new Date();
+    return db.select().from(statuses).where(sql`${statuses.expiresAt} > ${now}`).orderBy(desc(statuses.createdAt));
+  }
+
+  async deleteStatus(statusId: string): Promise<void> {
+    await db.delete(statuses).where(eq(statuses.id, statusId));
   }
 }
 

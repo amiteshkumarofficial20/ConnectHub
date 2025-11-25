@@ -306,6 +306,8 @@ export const signupSchema = insertUserSchema.extend({
   path: ["confirmPassword"],
 });
 
+export const insertStatusSchema = createInsertSchema(statuses).omit({ id: true, createdAt: true });
+
 export type User = typeof users.$inferSelect;
 export type InsertUser = z.infer<typeof insertUserSchema>;
 export type Message = typeof messages.$inferSelect;
@@ -318,6 +320,8 @@ export type Group = typeof groups.$inferSelect;
 export type InsertGroup = z.infer<typeof insertGroupSchema>;
 export type GroupMember = typeof groupMembers.$inferSelect;
 export type Notification = typeof notifications.$inferSelect;
+export type Status = typeof statuses.$inferSelect;
+export type InsertStatus = z.infer<typeof insertStatusSchema>;
 export type LoginData = z.infer<typeof loginSchema>;
 export type SignupData = z.infer<typeof signupSchema>;
 
@@ -325,3 +329,4 @@ export type PostWithAuthor = Post & { author: User };
 export type CommentWithAuthor = Comment & { author: User };
 export type MessageWithSender = Message & { sender: User };
 export type GroupWithMembers = Group & { members: (GroupMember & { user: User })[] };
+export type StatusWithUser = Status & { user: User };
