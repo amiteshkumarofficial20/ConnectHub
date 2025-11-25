@@ -23,7 +23,8 @@ export default function Feed() {
 
   const createPostMutation = useMutation({
     mutationFn: async ({ content, mediaUrl, mediaType }: { content: string; mediaUrl?: string; mediaType?: string }) => {
-      return apiRequest('POST', '/api/posts', { content, mediaUrl, mediaType });
+      const response = await apiRequest('POST', '/api/posts', { content, mediaUrl, mediaType });
+      return response;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['/api/posts'] });
@@ -32,7 +33,8 @@ export default function Feed() {
         description: 'Your post has been shared successfully.',
       });
     },
-    onError: () => {
+    onError: (error) => {
+      console.error('Post creation error:', error);
       toast({
         title: 'Error',
         description: 'Could not create post',
@@ -83,9 +85,14 @@ export default function Feed() {
   return (
     <div className="flex-1 overflow-y-auto p-6">
       <div className="max-w-2xl mx-auto space-y-6">
-        <CreatePostDialog onCreatePost={(content, mediaUrl, mediaType) => 
-          createPostMutation.mutateAsync({ content, mediaUrl, mediaType })
-        } />
+        <CreatePostDialog onCreatePost={async (content, mediaUrl, mediaType) => {
+          try {
+            await createPostMutation.mutateAsync({ content, mediaUrl, mediaType });
+          } catch (error) {
+            console.error('Error creating post:', error);
+            throw error;
+          }
+        }} />
 
         {posts && posts.length > 0 ? (
           posts.map((post) => (

@@ -5,6 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,8 +24,10 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
   const [mediaType, setMediaType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
+  const isValid = content.trim().length > 0 || mediaUrl.length > 0;
+
   const handleSubmit = async () => {
-    if (!content.trim() && !mediaUrl) return;
+    if (!isValid) return;
     setIsSubmitting(true);
     try {
       await onCreatePost(content.trim(), mediaUrl || undefined, mediaType || undefined);
@@ -50,8 +53,9 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
       <DialogContent className="max-w-md">
         <DialogHeader>
           <DialogTitle>Create a new post</DialogTitle>
+          <DialogDescription>Share your thoughts with the community</DialogDescription>
         </DialogHeader>
-        <div className="space-y-4 mt-4">
+        <div className="space-y-4">
           <div>
             <Label htmlFor="content">What's on your mind?</Label>
             <Textarea
@@ -92,7 +96,7 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
 
           <Button
             onClick={handleSubmit}
-            disabled={(!content.trim() && !mediaUrl) || isSubmitting}
+            disabled={!isValid || isSubmitting}
             className="w-full h-12"
             data-testid="button-submit-post"
           >
