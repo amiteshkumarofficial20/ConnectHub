@@ -24,13 +24,21 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
   const [mediaType, setMediaType] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const isValid = content.trim().length > 0 || mediaUrl.length > 0;
+  const canSubmit = (content.trim().length > 0 || mediaUrl.trim().length > 0) && !isSubmitting;
 
-  const handleSubmit = async () => {
-    if (!isValid) return;
+  const handleSubmit = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    
+    if (!canSubmit) return;
+    
     setIsSubmitting(true);
     try {
-      await onCreatePost(content.trim(), mediaUrl || undefined, mediaType || undefined);
+      await onCreatePost(
+        content.trim(),
+        mediaUrl.trim() || undefined,
+        mediaType.trim() || undefined
+      );
       setContent('');
       setMediaUrl('');
       setMediaType('');
@@ -82,7 +90,7 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
               className="mt-2 h-12"
               data-testid="input-media-url"
             />
-            {mediaUrl && (
+            {mediaUrl.trim() && (
               <Input
                 type="text"
                 value={mediaType}
@@ -96,7 +104,7 @@ export function CreatePostDialog({ onCreatePost }: CreatePostDialogProps) {
 
           <Button
             onClick={handleSubmit}
-            disabled={!isValid || isSubmitting}
+            disabled={!canSubmit}
             className="w-full h-12"
             data-testid="button-submit-post"
           >
