@@ -150,6 +150,18 @@ function Router() {
         )}
       </Route>
 
+      <Route path="/profile">
+        {() => (
+          <ProtectedRoute
+            component={() => (
+              <AppLayout>
+                <Profile />
+              </AppLayout>
+            )}
+          />
+        )}
+      </Route>
+
       <Route path="/profile/:userId">
         {() => (
           <ProtectedRoute
