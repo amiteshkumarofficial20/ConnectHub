@@ -291,16 +291,21 @@ export class DatabaseStorage implements IStorage {
     await db.update(notifications).set({ isRead: true }).where(eq(notifications.id, notificationId));
   }
 
-  async searchUsers(query: string, excludeUserId: string): Promise<User[]> {
-    const results = await db.select().from(users).where(
-      and(
-        or(
-          sql`${users.username} ILIKE ${`%${query}%`}`,
-          sql`${users.name} ILIKE ${`%${query}%`}`,
-          sql`${users.email} ILIKE ${`%${query}%`}`
-        ),
-        sql`${users.id} != ${excludeUserId}`
+  async searchUsers(query: string, excludeUserId?: string): Promise<User[]> {
+    const conditions = [
+      or(
+        sql`${users.username} ILIKE ${`%${query}%`}`,
+        sql`${users.name} ILIKE ${`%${query}%`}`,
+        sql`${users.email} ILIKE ${`%${query}%`}`
       )
+    ];
+    
+    if (excludeUserId) {
+      conditions.push(sql`${users.id} != ${excludeUserId}`);
+    }
+    
+    const results = await db.select().from(users).where(
+      and(...conditions)
     ).limit(20);
     return results;
   }

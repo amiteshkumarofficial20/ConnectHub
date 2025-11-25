@@ -227,7 +227,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
 
   app.get('/api/users/search/:query', authenticateToken, async (req: AuthRequest, res) => {
     try {
-      const results = await storage.searchUsers(req.params.query, req.userId!);
+      const results = await storage.searchUsers(req.params.query);
       const withoutPasswords = results.map(({ password, ...user }) => user);
       res.json(withoutPasswords);
     } catch (error) {

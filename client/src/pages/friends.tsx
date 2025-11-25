@@ -166,36 +166,42 @@ export default function Friends() {
               </div>
             ) : searchResults && searchResults.length > 0 ? (
               <div className="space-y-3">
-                {searchResults.map((searchUser) => (
-                  <Card key={searchUser.id} className="p-4 cursor-pointer hover-elevate" onClick={() => setLocation(`/profile/${searchUser.id}`)} data-testid={`card-user-${searchUser.id}`}>
-                    <div className="flex items-center justify-between gap-3">
-                      <div className="flex items-center gap-3 flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
-                        <UserAvatar user={searchUser} size="md" />
-                        <div className="flex-1 min-w-0">
-                          <p className="font-semibold text-foreground">{searchUser.name}</p>
-                          <p className="text-sm text-muted-foreground">@{searchUser.username}</p>
+                {searchResults.map((searchUser) => {
+                  const isOwnProfile = searchUser.id === user?.id;
+                  return (
+                    <Card key={searchUser.id} className="p-4 cursor-pointer hover-elevate" onClick={() => setLocation(`/profile${isOwnProfile ? '' : `/${searchUser.id}`}`)} data-testid={`card-user-${searchUser.id}`}>
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3 flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+                          <UserAvatar user={searchUser} size="md" />
+                          <div className="flex-1 min-w-0">
+                            <p className="font-semibold text-foreground">{searchUser.name}</p>
+                            <p className="text-sm text-muted-foreground">@{searchUser.username}</p>
+                            {isOwnProfile && <p className="text-xs text-muted-foreground">(You)</p>}
+                          </div>
                         </div>
+                        {!isOwnProfile && (
+                          <Button
+                            size="sm"
+                            variant={sentRequests.includes(searchUser.id) ? 'outline' : 'default'}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              if (sentRequests.includes(searchUser.id)) {
+                                cancelRequestMutation.mutate(searchUser.id);
+                              } else {
+                                sendRequestMutation.mutate(searchUser.id);
+                              }
+                            }}
+                            disabled={sendRequestMutation.isPending || cancelRequestMutation.isPending}
+                            data-testid={`button-add-friend-${searchUser.id}`}
+                          >
+                            <UserPlus className="w-4 h-4" />
+                            {sentRequests.includes(searchUser.id) ? 'Request Sent' : 'Add'}
+                          </Button>
+                        )}
                       </div>
-                      <Button
-                        size="sm"
-                        variant={sentRequests.includes(searchUser.id) ? 'outline' : 'default'}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          if (sentRequests.includes(searchUser.id)) {
-                            cancelRequestMutation.mutate(searchUser.id);
-                          } else {
-                            sendRequestMutation.mutate(searchUser.id);
-                          }
-                        }}
-                        disabled={sendRequestMutation.isPending || cancelRequestMutation.isPending}
-                        data-testid={`button-add-friend-${searchUser.id}`}
-                      >
-                        <UserPlus className="w-4 h-4" />
-                        {sentRequests.includes(searchUser.id) ? 'Request Sent' : 'Add'}
-                      </Button>
-                    </div>
-                  </Card>
-                ))}
+                    </Card>
+                  );
+                })}
               </div>
             ) : (
               <p className="text-muted-foreground text-center py-8">No users found</p>

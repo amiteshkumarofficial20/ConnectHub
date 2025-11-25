@@ -27,21 +27,11 @@ export function WebSocketProvider({ children }: { children: ReactNode }) {
     const connect = () => {
       try {
         const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+        const host = window.location.host || window.location.hostname;
         
-        // Use window.location.host which includes hostname:port
-        let host = window.location.host;
-        
-        // Safety check for Replit's proxy environment or edge cases
-        if (!host || host.includes("undefined") || host === "" || typeof host !== "string") {
-          const hostname = window.location.hostname || "localhost";
-          const port = window.location.port;
-          
-          // Only use port if it's a valid number string, not "undefined"
-          if (port && port !== "undefined" && !isNaN(parseInt(port))) {
-            host = `${hostname}:${port}`;
-          } else {
-            host = hostname;
-          }
+        if (!host || host.includes("undefined")) {
+          console.error('Invalid host configuration for WebSocket');
+          return;
         }
         
         const wsUrl = `${protocol}//${host}/ws`;
