@@ -85,34 +85,46 @@ export default function Feed() {
 
   return (
     <div className="flex-1 overflow-y-auto p-6">
-      <div className="max-w-2xl mx-auto space-y-6">
-        <StatusBar />
+      <div className="max-w-2xl mx-auto">
+        {/* Status Section */}
+        <div className="mb-8">
+          <StatusBar />
+        </div>
 
-        <CreatePostDialog onCreatePost={async (content, mediaUrl, mediaType) => {
-          try {
-            await createPostMutation.mutateAsync({ content, mediaUrl, mediaType });
-          } catch (error) {
-            console.error('Error creating post:', error);
-            throw error;
-          }
-        }} />
+        {/* Create Post Section */}
+        <div className="mb-8">
+          <CreatePostDialog onCreatePost={async (content, mediaUrl, mediaType) => {
+            try {
+              await createPostMutation.mutateAsync({ content, mediaUrl, mediaType });
+            } catch (error) {
+              console.error('Error creating post:', error);
+              throw error;
+            }
+          }} />
+        </div>
 
-        {posts && posts.length > 0 ? (
-          posts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              comments={postCommentsData?.[post.id] || []}
-              onLike={() => likeMutation.mutate(post.id)}
-              onComment={(content) => commentMutation.mutate({ postId: post.id, content })}
-              isLiked={postLikes?.[post.id] || false}
-            />
-          ))
-        ) : (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground">No posts yet. Create the first one!</p>
-          </div>
-        )}
+        {/* Feed Section */}
+        <div className="space-y-6">
+          <h2 className="text-xl font-bold">Feed</h2>
+          {posts && posts.length > 0 ? (
+            <div className="space-y-6">
+              {posts.map((post) => (
+                <PostCard
+                  key={post.id}
+                  post={post}
+                  comments={postCommentsData?.[post.id] || []}
+                  onLike={() => likeMutation.mutate(post.id)}
+                  onComment={(content) => commentMutation.mutate({ postId: post.id, content })}
+                  isLiked={postLikes?.[post.id] || false}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground">No posts yet. Create the first one!</p>
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
