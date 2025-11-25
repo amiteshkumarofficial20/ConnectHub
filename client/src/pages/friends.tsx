@@ -20,7 +20,12 @@ export default function Friends() {
     queryKey: ['/api/users/search', searchQuery],
     queryFn: async () => {
       if (!searchQuery.trim()) return [];
-      const response = await fetch(`/api/users/search/${encodeURIComponent(searchQuery)}`);
+      const token = localStorage.getItem('token');
+      const response = await fetch(`/api/users/search/${encodeURIComponent(searchQuery)}`, {
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        }
+      });
       if (!response.ok) throw new Error('Search failed');
       return response.json();
     },

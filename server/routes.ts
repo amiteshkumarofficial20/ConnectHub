@@ -8,6 +8,7 @@ import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import cors from "cors";
 import { body, validationResult } from "express-validator";
+import jwt from "jsonwebtoken";
 
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -37,7 +38,6 @@ export async function registerRoutes(app: Express): Promise<Server> {
         if (data.type === 'authenticate') {
           if (data.token && data.userId) {
             try {
-              const jwt = require('jsonwebtoken');
               const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key-change-in-production';
               const decoded = jwt.verify(data.token, JWT_SECRET) as { userId: string };
               if (decoded.userId === data.userId) {
