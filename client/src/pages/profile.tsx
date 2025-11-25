@@ -40,27 +40,11 @@ export default function Profile() {
   const { data: userPosts = [], isLoading: postsLoading } = useQuery<PostWithAuthor[]>({
     queryKey: ['/api/posts/user', profileUserId],
     enabled: !!profileUserId,
-    queryFn: async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/posts/user/${profileUserId}`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) throw new Error('Failed to fetch posts');
-      return response.json();
-    },
   });
 
   const { data: followerStats = { followers: 0, following: 0 } } = useQuery({
     queryKey: ['/api/users/stats', profileUserId],
     enabled: !!profileUserId,
-    queryFn: async () => {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`/api/users/${profileUserId}/stats`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-      });
-      if (!response.ok) return { followers: 0, following: 0 };
-      return response.json();
-    },
   });
 
   const { data: sentRequests = [] } = useQuery<string[]>({
@@ -102,10 +86,18 @@ export default function Profile() {
     },
   });
 
-  if (userLoading || !displayUser) return (
+  if (userLoading || (!isOwnProfile && !displayUser)) return (
     <div className="flex-1 overflow-y-auto">
       <div className="max-w-4xl mx-auto p-6">
         <Skeleton className="h-96 w-full" />
+      </div>
+    </div>
+  );
+
+  if (!displayUser) return (
+    <div className="flex-1 overflow-y-auto">
+      <div className="max-w-4xl mx-auto p-6 text-center">
+        <p className="text-muted-foreground">Loading profile...</p>
       </div>
     </div>
   );

@@ -171,7 +171,7 @@ export default function Friends() {
                   return (
                     <Card key={searchUser.id} className="p-4 cursor-pointer hover-elevate" onClick={() => setLocation(`/profile${isOwnProfile ? '' : `/${searchUser.id}`}`)} data-testid={`card-user-${searchUser.id}`}>
                       <div className="flex items-center justify-between gap-3">
-                        <div className="flex items-center gap-3 flex-1 min-w-0" onClick={(e) => e.stopPropagation()}>
+                        <div className="flex items-center gap-3 flex-1 min-w-0">
                           <UserAvatar user={searchUser} size="md" />
                           <div className="flex-1 min-w-0">
                             <p className="font-semibold text-foreground">{searchUser.name}</p>
