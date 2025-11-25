@@ -257,6 +257,22 @@ export default function Messages() {
                       key={message.id}
                       message={message}
                       isSent={message.senderId === user?.id}
+                      onBlock={(sender) => {
+                        setBlockedUserDetails({ id: sender.id, name: sender.name });
+                        setBlockDialogOpen(true);
+                      }}
+                      onReport={(messageId) => {
+                        toast({
+                          title: 'Message Reported',
+                          description: 'Thank you for reporting this message',
+                        });
+                      }}
+                      onDelete={(messageId) => {
+                        toast({
+                          title: 'Message Deleted',
+                          description: 'Message has been removed',
+                        });
+                      }}
                     />
                   ))}
                   <div ref={messagesEndRef} />
