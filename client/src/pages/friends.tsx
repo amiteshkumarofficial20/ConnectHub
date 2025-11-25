@@ -37,6 +37,10 @@ export default function Friends() {
     queryKey: ['/api/friend-requests/pending'],
   });
 
+  const { data: sentRequests = [] } = useQuery({
+    queryKey: ['/api/friend-requests/sent'],
+  });
+
   const sendRequestMutation = useMutation({
     mutationFn: async (receiverId: string) => {
       return apiRequest('POST', '/api/friend-requests', { receiverId });
@@ -46,6 +50,7 @@ export default function Friends() {
         title: 'Success',
         description: 'Friend request sent!',
       });
+      queryClient.invalidateQueries({ queryKey: ['/api/friend-requests/sent'] });
       queryClient.invalidateQueries({ queryKey: ['/api/users/search', searchQuery] });
     },
     onError: () => {
@@ -54,6 +59,19 @@ export default function Friends() {
         description: 'Could not send friend request',
         variant: 'destructive',
       });
+    },
+  });
+
+  const cancelRequestMutation = useMutation({
+    mutationFn: async (receiverId: string) => {
+      return apiRequest('DELETE', `/api/friend-requests/${receiverId}/cancel`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Cancelled',
+        description: 'Friend request cancelled',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/friend-requests/sent'] });
     },
   });
 
@@ -160,15 +178,20 @@ export default function Friends() {
                       </div>
                       <Button
                         size="sm"
+                        variant={sentRequests.includes(searchUser.id) ? 'outline' : 'default'}
                         onClick={(e) => {
                           e.stopPropagation();
-                          sendRequestMutation.mutate(searchUser.id);
+                          if (sentRequests.includes(searchUser.id)) {
+                            cancelRequestMutation.mutate(searchUser.id);
+                          } else {
+                            sendRequestMutation.mutate(searchUser.id);
+                          }
                         }}
-                        disabled={sendRequestMutation.isPending}
+                        disabled={sendRequestMutation.isPending || cancelRequestMutation.isPending}
                         data-testid={`button-add-friend-${searchUser.id}`}
                       >
                         <UserPlus className="w-4 h-4" />
-                        Add
+                        {sentRequests.includes(searchUser.id) ? 'Request Sent' : 'Add'}
                       </Button>
                     </div>
                   </Card>

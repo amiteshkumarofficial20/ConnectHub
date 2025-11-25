@@ -48,6 +48,12 @@ export default function Profile() {
     },
   });
 
+  const { data: sentRequests = [] } = useQuery({
+    queryKey: ['/api/friend-requests/sent'],
+  });
+
+  const isSent = sentRequests.includes(profileUserId!);
+
   const sendRequestMutation = useMutation({
     mutationFn: async () => {
       return apiRequest('POST', '/api/friend-requests', { receiverId: profileUserId });
@@ -57,7 +63,7 @@ export default function Profile() {
         title: 'Success',
         description: 'Friend request sent!',
       });
-      queryClient.invalidateQueries({ queryKey: ['/api/friend-requests/pending'] });
+      queryClient.invalidateQueries({ queryKey: ['/api/friend-requests/sent'] });
     },
     onError: () => {
       toast({
@@ -65,6 +71,19 @@ export default function Profile() {
         description: 'Could not send friend request',
         variant: 'destructive',
       });
+    },
+  });
+
+  const cancelRequestMutation = useMutation({
+    mutationFn: async () => {
+      return apiRequest('DELETE', `/api/friend-requests/${profileUserId}/cancel`, {});
+    },
+    onSuccess: () => {
+      toast({
+        title: 'Cancelled',
+        description: 'Friend request cancelled',
+      });
+      queryClient.invalidateQueries({ queryKey: ['/api/friend-requests/sent'] });
     },
   });
 
@@ -111,13 +130,14 @@ export default function Profile() {
               </Button>
             ) : (
               <Button
-                onClick={() => sendRequestMutation.mutate()}
-                disabled={sendRequestMutation.isPending}
+                onClick={() => isSent ? cancelRequestMutation.mutate() : sendRequestMutation.mutate()}
+                disabled={sendRequestMutation.isPending || cancelRequestMutation.isPending}
+                variant={isSent ? 'outline' : 'default'}
                 className="mt-4"
                 data-testid="button-send-friend-request"
               >
                 <UserPlus className="w-4 h-4 mr-2" />
-                Add Friend
+                {isSent ? 'Request Sent' : 'Add Friend'}
               </Button>
             )}
           </div>

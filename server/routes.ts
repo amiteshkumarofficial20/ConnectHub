@@ -272,6 +272,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
     }
   });
 
+  app.get('/api/friend-requests/sent', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      const sentRequestIds = await storage.getSentRequests(req.userId!);
+      res.json(sentRequestIds);
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to fetch sent requests' });
+    }
+  });
+
+  app.delete('/api/friend-requests/:receiverId/cancel', authenticateToken, async (req: AuthRequest, res) => {
+    try {
+      await storage.cancelFriendRequest(req.userId!, req.params.receiverId);
+      res.json({ success: true });
+    } catch (error) {
+      res.status(500).json({ error: 'Failed to cancel request' });
+    }
+  });
+
   app.get('/api/messages/conversations', authenticateToken, async (req: AuthRequest, res: any) => {
     try {
       const lastMessages = await storage.getLastMessages(req.userId!);

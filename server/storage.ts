@@ -53,7 +53,9 @@ export interface IStorage {
   sendFriendRequest(senderId: string, receiverId: string): Promise<void>;
   acceptFriendRequest(requestId: string): Promise<void>;
   rejectFriendRequest(requestId: string): Promise<void>;
+  cancelFriendRequest(senderId: string, receiverId: string): Promise<void>;
   getPendingRequests(userId: string): Promise<any[]>;
+  getSentRequests(userId: string): Promise<string[]>;
   countFollowers(userId: string): Promise<number>;
   countFollowing(userId: string): Promise<number>;
 }
@@ -362,6 +364,26 @@ export class DatabaseStorage implements IStorage {
       )
     );
     return following.length;
+  }
+
+  async cancelFriendRequest(senderId: string, receiverId: string): Promise<void> {
+    await db.delete(friendRequests).where(
+      and(
+        eq(friendRequests.senderId, senderId),
+        eq(friendRequests.receiverId, receiverId),
+        eq(friendRequests.status, 'pending')
+      )
+    );
+  }
+
+  async getSentRequests(userId: string): Promise<string[]> {
+    const requests = await db.select({ receiverId: friendRequests.receiverId }).from(friendRequests).where(
+      and(
+        eq(friendRequests.senderId, userId),
+        eq(friendRequests.status, 'pending')
+      )
+    );
+    return requests.map(r => r.receiverId);
   }
 }
 
