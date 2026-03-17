@@ -3,6 +3,7 @@ import { PostCard } from '@/components/PostCard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useToast } from '@/hooks/use-toast';
 import { apiRequest, queryClient } from '@/lib/queryClient';
+import { CreatePostDialog } from '@/components/CreatePostDialog';
 import type { PostWithAuthor, CommentWithAuthor } from '@shared/schema';
 
 export default function Feed() {
@@ -41,6 +42,14 @@ export default function Feed() {
       });
     },
   });
+
+  const createPost = async (
+  content: string,
+  mediaUrl?: string,
+  mediaType?: string
+) => {
+  await createPostMutation.mutateAsync({ content, mediaUrl, mediaType });
+};
 
   const likeMutation = useMutation({
     mutationFn: async (postId: string) => {
@@ -81,32 +90,40 @@ export default function Feed() {
     );
   }
 
-  return (
-    <div className="flex-1 overflow-y-auto p-6">
-      <div className="max-w-2xl mx-auto">
-        {/* Feed Section */}
-        <div className="space-y-6">
-          <h2 className="text-xl font-bold">Feed</h2>
-          {posts && posts.length > 0 ? (
-            <div className="space-y-6">
-              {posts.map((post) => (
-                <PostCard
-                  key={post.id}
-                  post={post}
-                  comments={postCommentsData?.[post.id] || []}
-                  onLike={() => likeMutation.mutate(post.id)}
-                  onComment={(content) => commentMutation.mutate({ postId: post.id, content })}
-                  isLiked={postLikes?.[post.id] || false}
-                />
-              ))}
-            </div>
-          ) : (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">No posts yet. Create the first one!</p>
-            </div>
-          )}
-        </div>
+ return (
+  <div className="flex-1 overflow-y-auto p-6">
+    <div className="max-w-2xl mx-auto">
+      {/* Feed Section */}
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold">Feed</h2>
+
+        {/* 🔥 ADD THIS LINE */}
+        <CreatePostDialog onCreatePost={createPost} />
+
+        {posts && posts.length > 0 ? (
+          <div className="space-y-6">
+            {posts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                comments={postCommentsData?.[post.id] || []}
+                onLike={() => likeMutation.mutate(post.id)}
+                onComment={(content) =>
+                  commentMutation.mutate({ postId: post.id, content })
+                }
+                isLiked={postLikes?.[post.id] || false}
+              />
+            ))}
+          </div>
+        ) : (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground">
+              No posts yet. Create the first one!
+            </p>
+          </div>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
 }

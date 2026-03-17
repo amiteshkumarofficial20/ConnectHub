@@ -23,17 +23,17 @@ localPort = 42359
 externalPort = 3001
 
 [[ports]]
-localPort = 43985
-externalPort = 3000
+localPort = 43985 
+externalPort = 3000 
 
 [env]
-PORT = "5000"
+PORT = "5000"   
 
-[workflows]
-runButton = "Project"
+[workflows]         
+runButton = "Project" 
 
-[[workflows.workflow]]
-name = "Project"
+[[workflows.workflow]] 
+name = "Project" 
 mode = "parallel"
 author = "agent"
 
